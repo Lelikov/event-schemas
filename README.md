@@ -13,11 +13,35 @@ This package provides:
 ## Installation
 
 ```bash
+# From GitHub (latest)
+pip install git+https://github.com/Lelikov/event-schemas.git
+
+# From GitHub (specific tag)
+pip install git+https://github.com/Lelikov/event-schemas.git@v0.1.0
+
+# From GitHub (specific branch)
+pip install git+https://github.com/Lelikov/event-schemas.git@main
+
 # Local development
 pip install -e /path/to/event-schemas
 
-# From private PyPI
+# From private PyPI (if published)
 pip install event-schemas
+```
+
+### Adding to Dependencies
+
+**requirements.txt:**
+```
+event-schemas @ git+https://github.com/Lelikov/event-schemas.git@v0.1.0
+```
+
+**pyproject.toml:**
+```toml
+[project]
+dependencies = [
+    "event-schemas @ git+https://github.com/Lelikov/event-schemas.git@v0.1.0"
+]
 ```
 
 ## Usage
