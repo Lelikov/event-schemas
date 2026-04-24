@@ -15,12 +15,11 @@ Recommendation: Decide on a single canonical EventType enum in `event-schemas`. 
 
 ---
 
-### [CRITICAL-2] UserInfo missing `time_zone` field referenced at runtime by event-receiver normalizer
+### [CRITICAL-2] ~~UserInfo missing `time_zone` field referenced at runtime by event-receiver normalizer~~ — RESOLVED
 
 Services affected: event-schemas, event-receiver
-Location: `event-schemas/event_schemas/types.py:72-76`, `event-receiver/event_receiver/normalizers.py:117`
-Description: `UserInfo` only declares `email: EmailStr`. However, `_participants_from_booking_reassigned` in the normalizer accesses `validated.user.time_zone`, which does not exist on `UserInfo`. This will raise `AttributeError` at runtime for every `booking.reassigned` event, causing normalization to silently return an empty participants list (caught by the broad `except` on line 47).
-Recommendation: Add `time_zone: str | None = None` to `UserInfo` (with an IANA timezone validator per the CLAUDE.md convention), or remove the reference in the normalizer.
+Location: `event-schemas/event_schemas/types.py`
+Resolution: `UserInfo` now declares `time_zone: str | None = None`. The `AttributeError` that previously caused every `booking.reassigned` normalization to silently fail is eliminated.
 
 ---
 
@@ -44,30 +43,27 @@ Recommendation: Add an `EVENT_TYPE_TO_MODEL: dict[EventType, type[BaseModel]]` m
 
 ---
 
-### [HIGH-2] GETSTREAM_CHANEL_CREATED/DELETED misspelled (should be CHANNEL)
+### [HIGH-2] ~~GETSTREAM_CHANEL_CREATED/DELETED misspelled (should be CHANNEL)~~ — RESOLVED
 
 Services affected: event-schemas, event-receiver
-Location: `event-schemas/event_schemas/types.py:35-36`
-Description: The enum members are spelled `GETSTREAM_CHANEL_CREATED` and `GETSTREAM_CHANEL_DELETED` (missing second "N" in "CHANNEL"). The string values are correct (`"getstream.channel.created"`), but the Python identifiers contain a typo. Event-saver's parallel enum spells it correctly as `GETSTREAM_CHANNEL_CREATED`. This creates confusion and grep-based refactoring hazards.
-Recommendation: Rename to `GETSTREAM_CHANNEL_CREATED` and `GETSTREAM_CHANNEL_DELETED`. Update all references in event-receiver normalizers.
+Location: `event-schemas/event_schemas/types.py`
+Resolution: Enum members have been renamed to `GETSTREAM_CHANNEL_CREATED` and `GETSTREAM_CHANNEL_DELETED` (correct spelling). All references in event-receiver normalizers updated accordingly.
 
 ---
 
-### [HIGH-3] EVENT_PRIORITIES missing entries for GETSTREAM_CHANEL_CREATED and GETSTREAM_CHANEL_DELETED
+### [HIGH-3] ~~EVENT_PRIORITIES missing entries for GETSTREAM_CHANEL_CREATED and GETSTREAM_CHANEL_DELETED~~ — RESOLVED
 
 Services affected: event-schemas, event-receiver
-Location: `event-schemas/event_schemas/types.py:86-113`
-Description: `EVENT_PRIORITIES` maps 23 of 25 EventType members. `GETSTREAM_CHANEL_CREATED` and `GETSTREAM_CHANEL_DELETED` have no entry. The publisher falls back to `EventPriority.NORMAL` via `.get()`, but this is implicit and undocumented, meaning these events silently get a default priority rather than an explicitly assigned one. Any future change to the fallback would silently change their priority.
-Recommendation: Add explicit entries for all EventType members. Consider adding a runtime assertion or test that `len(EVENT_PRIORITIES) == len(EventType)`.
+Location: `event-schemas/event_schemas/types.py`
+Resolution: `EVENT_PRIORITIES` now has complete coverage — all 35 `EventType` members have explicit entries, including `GETSTREAM_CHANNEL_CREATED` and `GETSTREAM_CHANNEL_DELETED` (fixed in conjunction with HIGH-2 rename).
 
 ---
 
-### [HIGH-4] EVENT_SCHEMA_VERSIONS missing entries for GETSTREAM_CHANEL_CREATED and GETSTREAM_CHANEL_DELETED
+### [HIGH-4] ~~EVENT_SCHEMA_VERSIONS missing entries for GETSTREAM_CHANEL_CREATED and GETSTREAM_CHANEL_DELETED~~ — RESOLVED
 
 Services affected: event-schemas, event-receiver
-Location: `event-schemas/event_schemas/types.py:116-140`
-Description: Same gap as EVENT_PRIORITIES. These two event types fall back to `"v1"` via `.get()` in the publisher, but the omission means completeness cannot be verified programmatically.
-Recommendation: Add the missing entries. Add a completeness check (test or assertion) that every EventType member has an entry in both maps.
+Location: `event-schemas/event_schemas/types.py`
+Resolution: `EVENT_SCHEMA_VERSIONS` now has complete coverage — all 35 `EventType` members have explicit entries, including `GETSTREAM_CHANNEL_CREATED` and `GETSTREAM_CHANNEL_DELETED` (fixed in conjunction with HIGH-2 rename).
 
 ---
 
@@ -211,15 +207,28 @@ Recommendation: Either add `user` and `client` fields to `BookingCancelledPayloa
 | `notification.send_requested` | NotificationCommandPayload | Routed only | Not in saver enum | Consumed by event-notifier |
 | `notification.push.message_sent` | PushNotificationPayload | Not used | Not in saver enum | No consumer |
 | `unisender.events.v1.transactional.status.create` | UniSenderStatusPayload | Normalizer validated | Own enum (same string) | Only matching string value |
-| `getstream.channel.created` | GetStreamEventPayload (shared) | Normalizer validated | Own enum (different string) | Typo in enum name (CHANEL) |
-| `getstream.channel.deleted` | GetStreamEventPayload (shared) | Normalizer validated | Own enum (different string) | Typo in enum name (CHANEL) |
+| `getstream.channel.created` | GetStreamEventPayload (shared) | Normalizer validated | Own enum (different string) | Enum name corrected (was CHANEL) |
+| `getstream.channel.deleted` | GetStreamEventPayload (shared) | Normalizer validated | Own enum (different string) | Enum name corrected (was CHANEL) |
 | `getstream.message.new` | GetStreamEventPayload (shared) | Normalizer validated | Own enum (different string) | String mismatch |
 | `getstream.message.updated` | GetStreamEventPayload (shared) | Not used in normalizer | No saver enum member | No consumer |
 | `getstream.message.deleted` | GetStreamEventPayload (shared) | Not used in normalizer | No saver enum member | No consumer |
 | `getstream.message.read` | GetStreamEventPayload (shared) | Not used in normalizer | Own enum (different string) | String mismatch |
-| `jitsi.room.created` | JitsiEventPayload (shared) | Normalizer validated | Matched by prefix pattern | No typed enum |
-| `jitsi.participant.joined` | JitsiEventPayload (shared) | Normalizer validated | Matched by prefix pattern | No typed enum |
-| `jitsi.participant.left` | JitsiEventPayload (shared) | Normalizer validated | Matched by prefix pattern | No typed enum |
+| `jitsi.conference.joined` | JitsiEventPayload (shared) | Normalizer validated | Matched by prefix pattern | No typed enum in saver |
+| `jitsi.conference.left` | JitsiEventPayload (shared) | Normalizer validated | Matched by prefix pattern | No typed enum in saver |
+| `jitsi.participant.joined` | JitsiEventPayload (shared) | Normalizer validated | Matched by prefix pattern | No typed enum in saver |
+| `jitsi.participant.left` | JitsiEventPayload (shared) | Normalizer validated | Matched by prefix pattern | No typed enum in saver |
+| `jitsi.participant.muted` | JitsiEventPayload (shared) | Not validated in normalizer | Matched by prefix pattern | No typed enum in saver |
+| `jitsi.participant.menu_button_click` | JitsiEventPayload (shared) | Not validated in normalizer | Matched by prefix pattern | No typed enum in saver |
+| `jitsi.audio.mute_status_changed` | JitsiEventPayload (shared) | Not validated in normalizer | Matched by prefix pattern | No typed enum in saver |
+| `jitsi.video.mute_status_changed` | JitsiEventPayload (shared) | Not validated in normalizer | Matched by prefix pattern | No typed enum in saver |
+| `jitsi.speaker.dominant_changed` | JitsiEventPayload (shared) | Not validated in normalizer | Matched by prefix pattern | No typed enum in saver |
+| `jitsi.device.list_changed` | JitsiEventPayload (shared) | Not validated in normalizer | Matched by prefix pattern | No typed enum in saver |
+| `jitsi.camera.error` | JitsiEventPayload (shared) | Not validated in normalizer | Matched by prefix pattern | No typed enum in saver |
+| `jitsi.mic.error` | JitsiEventPayload (shared) | Not validated in normalizer | Matched by prefix pattern | No typed enum in saver |
+| `jitsi.error.occurred` | JitsiEventPayload (shared) | Not validated in normalizer | Matched by prefix pattern | No typed enum in saver |
+| `jitsi.peer_connection.failure` | JitsiEventPayload (shared) | Not validated in normalizer | Matched by prefix pattern | No typed enum in saver |
+| `jitsi.suspend.detected` | JitsiEventPayload (shared) | Not validated in normalizer | Matched by prefix pattern | No typed enum in saver |
+| `jitsi.toolbar.button_clicked` | JitsiEventPayload (shared) | Not validated in normalizer | Matched by prefix pattern | No typed enum in saver |
 | -- | EmailRejectionNotificationPayload | Not wired to any EventType | Not used | Orphaned model |
 
 **Legend:** "Own enum" = event-saver has its own EventType member with a different string value than event-schemas.

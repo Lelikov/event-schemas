@@ -27,7 +27,7 @@ Despite being the largest downstream consumer of events, event-saver **does not 
 
 | Module | Purpose | Key exports |
 |--------|---------|-------------|
-| `types.py` | Core enums and base models | `EventType`, `EventPriority`, `RecipientRole`, `TriggerEvent`, `UserInfo`, `ClientInfo`, `EVENT_PRIORITIES`, `EVENT_SCHEMA_VERSIONS` |
+| `types.py` | Core enums and base models | `SourceType`, `EventType`, `EventPriority`, `RecipientRole`, `TriggerEvent`, `UserInfo`, `ClientInfo`, `EVENT_PRIORITIES`, `EVENT_SCHEMA_VERSIONS` |
 | `booking.py` | Booking lifecycle payloads | `BookingCreatedPayload`, `BookingRescheduledPayload`, `BookingReassignedPayload`, `BookingCancelledPayload`, `BookingReminderSentPayload` |
 | `chat.py` | GetStream chat payloads | `ChatCreatedPayload`, `ChatDeletedPayload`, `ChatMessageSentPayload` |
 | `meeting.py` | Jitsi meeting URL payloads | `MeetingUrlCreatedPayload`, `MeetingUrlDeletedPayload` |
@@ -51,7 +51,7 @@ Four priority levels control RabbitMQ message ordering (`types.py:46-52`):
 | NORMAL | 5 | All chat events, meeting events, and external integrations (GetStream, Jitsi, UniSender) |
 | LOW | 1 | Reserved -- no events currently assigned |
 
-Complete mapping: `types.py:87-116` (25 entries covering all `EventType` members).
+Complete mapping: `types.py` (35 entries covering all `EventType` members).
 
 ---
 

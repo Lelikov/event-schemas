@@ -6,7 +6,18 @@ All exports are defined in `event_schemas/__init__.py:44-83`.
 
 ## Enums
 
-### EventType (`types.py:8-43`)
+### SourceType (`types.py:8-14`)
+
+`StrEnum`. Identifies the originating system of a CloudEvent (used as the `ce-source` attribute).
+
+| Member | Value |
+|--------|-------|
+| `BOOKING` | `"booking"` |
+| `GETSTREAM` | `"getstream"` |
+| `UNISENDER_GO` | `"unisender-go"` |
+| `JITSI` | `"jitsi"` |
+
+### EventType (`types.py:17-65`)
 
 `str` enum. Values are dot-delimited event identifiers used as CloudEvent `ce-type`.
 
@@ -108,8 +119,8 @@ All exports are defined in `event_schemas/__init__.py:44-83`.
 
 | Field | Type | Default |
 |-------|------|---------|
-| `volunteer_id` | `str` | required |
-| `client_id` | `str` | required |
+| `volunteer_id` | `str \| None` | `None` |
+| `client_id` | `str \| None` | `None` |
 | `user` | `UserInfo` | required |
 | `client` | `ClientInfo` | required |
 | `start_time` | `datetime` | required |
