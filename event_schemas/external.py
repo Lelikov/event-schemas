@@ -15,14 +15,18 @@ class UniSenderStatusPayload(BaseModel):
     event_name: str | None = Field(None, description="UniSender event name")
     event_data: dict[str, Any] = Field(default_factory=dict, description="UniSender event data")
 
-    model_config = {"json_schema_extra": {"example": {
-        "event_name": "transactional_email_status",
-        "event_data": {
-            "email": "recipient@example.com",
-            "status": "sent",
-            "job_id": "job_123",
-        },
-    }}}
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "event_name": "transactional_email_status",
+                "event_data": {
+                    "email": "recipient@example.com",
+                    "status": "sent",
+                    "job_id": "job_123",
+                },
+            }
+        }
+    }
 
 
 class GetStreamEventPayload(BaseModel):
@@ -35,17 +39,22 @@ class GetStreamEventPayload(BaseModel):
     channel_id: str | None = Field(None, description="Channel ID (booking_id)")
     user: dict[str, Any] | None = Field(None, description="User who triggered the event")
     message: dict[str, Any] | None = Field(None, description="Message object (for message events)")
+    members: list[dict] | None = Field(None, description="Members object")
+
     # Allow additional fields
     extra: dict[str, Any] = Field(default_factory=dict, description="Additional GetStream fields")
 
     model_config = {
         "extra": "allow",
-        "json_schema_extra": {"example": {
-            "type": "message.new",
-            "channel_id": "booking-123",
-            "user": {"id": "user_123", "role": "user"},
-            "message": {"id": "msg_456", "text": "Hello"},
-        }},
+        "json_schema_extra": {
+            "example": {
+                "type": "message.new",
+                "channel_id": "booking-123",
+                "user": {"id": "user_123", "role": "user"},
+                "message": {"id": "msg_456", "text": "Hello"},
+                "members": [{"user_id": "user_456", "role": "owner"}],
+            }
+        },
     }
 
 
@@ -63,9 +72,11 @@ class JitsiEventPayload(BaseModel):
 
     model_config = {
         "extra": "allow",
-        "json_schema_extra": {"example": {
-            "room": "booking-123",
-            "event_type": "room.created",
-            "participant_id": "user_456",
-        }},
+        "json_schema_extra": {
+            "example": {
+                "room": "booking-123",
+                "event_type": "room.created",
+                "participant_id": "user_456",
+            }
+        },
     }

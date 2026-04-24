@@ -19,6 +19,7 @@ class NormalizedParticipant(TypedDict):
     email: str
     role: NotRequired[str | None]
     time_zone: NotRequired[str | None]
+    user_id: NotRequired[str]
 
 
 class NormalizedBooking(TypedDict):

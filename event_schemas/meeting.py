@@ -12,11 +12,15 @@ class MeetingUrlCreatedPayload(BaseModel):
     recipient_role: RecipientRole = Field(..., description="Recipient role (organizer or client)")
     meeting_url: AnyHttpUrl = Field(..., description="Meeting URL (Jitsi, Zoom, etc.)")
 
-    model_config = {"json_schema_extra": {"example": {
-        "email": "organizer@example.com",
-        "recipient_role": "organizer",
-        "meeting_url": "https://meet.jit.si/booking-123",
-    }}}
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "email": "organizer@example.com",
+                "recipient_role": "organizer",
+                "meeting_url": "https://meet.jit.si/booking-123",
+            }
+        }
+    }
 
 
 class MeetingUrlDeletedPayload(BaseModel):

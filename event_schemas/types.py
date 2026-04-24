@@ -1,9 +1,17 @@
 """Core types and enums for event schemas."""
 
-from datetime import datetime
-from enum import Enum
+from enum import Enum, StrEnum
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr
+
+
+class SourceType(StrEnum):
+    """Event source identifiers."""
+
+    BOOKING = "booking"
+    GETSTREAM = "getstream"
+    UNISENDER_GO = "unisender-go"
+    JITSI = "jitsi"
 
 
 class EventType(str, Enum):
@@ -28,16 +36,33 @@ class EventType(str, Enum):
     # Notifications
     NOTIFICATION_EMAIL_SENT = "notification.email.message_sent"
     NOTIFICATION_TELEGRAM_SENT = "notification.telegram.message_sent"
+    NOTIFICATION_SEND_REQUESTED = "notification.send_requested"
+    NOTIFICATION_PUSH_SENT = "notification.push.message_sent"
 
     # External integrations
     UNISENDER_STATUS_CREATED = "unisender.events.v1.transactional.status.create"
-    GETSTREAM_MESSAGE_NEW = "getstream.events.v1.message.new"
-    GETSTREAM_MESSAGE_UPDATED = "getstream.events.v1.message.updated"
-    GETSTREAM_MESSAGE_DELETED = "getstream.events.v1.message.deleted"
-    GETSTREAM_MESSAGE_READ = "getstream.events.v1.message.read"
-    JITSI_ROOM_CREATED = "jitsi.room.created"
+    GETSTREAM_CHANNEL_CREATED = "getstream.channel.created"
+    GETSTREAM_CHANNEL_DELETED = "getstream.channel.deleted"
+    GETSTREAM_MESSAGE_NEW = "getstream.message.new"
+    GETSTREAM_MESSAGE_UPDATED = "getstream.message.updated"
+    GETSTREAM_MESSAGE_DELETED = "getstream.message.deleted"
+    GETSTREAM_MESSAGE_READ = "getstream.message.read"
+    JITSI_CONFERENCE_JOINED = "jitsi.conference.joined"
+    JITSI_CONFERENCE_LEFT = "jitsi.conference.left"
     JITSI_PARTICIPANT_JOINED = "jitsi.participant.joined"
     JITSI_PARTICIPANT_LEFT = "jitsi.participant.left"
+    JITSI_PARTICIPANT_MUTED = "jitsi.participant.muted"
+    JITSI_PARTICIPANT_MENU_BUTTON_CLICK = "jitsi.participant.menu_button_click"
+    JITSI_AUDIO_MUTE_STATUS_CHANGED = "jitsi.audio.mute_status_changed"
+    JITSI_VIDEO_MUTE_STATUS_CHANGED = "jitsi.video.mute_status_changed"
+    JITSI_SPEAKER_DOMINANT_CHANGED = "jitsi.speaker.dominant_changed"
+    JITSI_DEVICE_LIST_CHANGED = "jitsi.device.list_changed"
+    JITSI_CAMERA_ERROR = "jitsi.camera.error"
+    JITSI_MIC_ERROR = "jitsi.mic.error"
+    JITSI_ERROR_OCCURRED = "jitsi.error.occurred"
+    JITSI_PEER_CONNECTION_FAILURE = "jitsi.peer_connection.failure"
+    JITSI_SUSPEND_DETECTED = "jitsi.suspend.detected"
+    JITSI_TOOLBAR_BUTTON_CLICKED = "jitsi.toolbar.button_clicked"
 
 
 class EventPriority(int, Enum):
@@ -71,22 +96,13 @@ class UserInfo(BaseModel):
     """User information (organizer or client)."""
 
     email: EmailStr
-    time_zone: str = Field(
-        ...,
-        pattern=r"^(UTC|[A-Za-z_]+/[A-Za-z_]+)$",
-        description="IANA timezone (e.g., UTC, Europe/Moscow)",
-    )
+    time_zone: str | None = None
 
 
 class ClientInfo(BaseModel):
     """Client information (extends UserInfo for future fields)."""
 
     email: EmailStr
-    time_zone: str = Field(
-        ...,
-        pattern=r"^(UTC|[A-Za-z_]+/[A-Za-z_]+)$",
-        description="IANA timezone (e.g., UTC, Europe/Moscow)",
-    )
 
 
 # Event type to priority mapping
@@ -99,6 +115,8 @@ EVENT_PRIORITIES: dict[EventType, EventPriority] = {
     # High: notifications
     EventType.NOTIFICATION_EMAIL_SENT: EventPriority.HIGH,
     EventType.NOTIFICATION_TELEGRAM_SENT: EventPriority.HIGH,
+    EventType.NOTIFICATION_SEND_REQUESTED: EventPriority.HIGH,
+    EventType.NOTIFICATION_PUSH_SENT: EventPriority.HIGH,
     EventType.BOOKING_REMINDER_SENT: EventPriority.HIGH,
     # Normal: chat and meeting
     EventType.CHAT_CREATED: EventPriority.NORMAL,
@@ -112,9 +130,24 @@ EVENT_PRIORITIES: dict[EventType, EventPriority] = {
     EventType.GETSTREAM_MESSAGE_UPDATED: EventPriority.NORMAL,
     EventType.GETSTREAM_MESSAGE_DELETED: EventPriority.NORMAL,
     EventType.GETSTREAM_MESSAGE_READ: EventPriority.NORMAL,
-    EventType.JITSI_ROOM_CREATED: EventPriority.NORMAL,
+    EventType.GETSTREAM_CHANNEL_CREATED: EventPriority.NORMAL,
+    EventType.GETSTREAM_CHANNEL_DELETED: EventPriority.NORMAL,
+    EventType.JITSI_CONFERENCE_JOINED: EventPriority.NORMAL,
+    EventType.JITSI_CONFERENCE_LEFT: EventPriority.NORMAL,
     EventType.JITSI_PARTICIPANT_JOINED: EventPriority.NORMAL,
     EventType.JITSI_PARTICIPANT_LEFT: EventPriority.NORMAL,
+    EventType.JITSI_PARTICIPANT_MUTED: EventPriority.NORMAL,
+    EventType.JITSI_PARTICIPANT_MENU_BUTTON_CLICK: EventPriority.NORMAL,
+    EventType.JITSI_AUDIO_MUTE_STATUS_CHANGED: EventPriority.NORMAL,
+    EventType.JITSI_VIDEO_MUTE_STATUS_CHANGED: EventPriority.NORMAL,
+    EventType.JITSI_SPEAKER_DOMINANT_CHANGED: EventPriority.NORMAL,
+    EventType.JITSI_DEVICE_LIST_CHANGED: EventPriority.NORMAL,
+    EventType.JITSI_CAMERA_ERROR: EventPriority.NORMAL,
+    EventType.JITSI_MIC_ERROR: EventPriority.NORMAL,
+    EventType.JITSI_ERROR_OCCURRED: EventPriority.NORMAL,
+    EventType.JITSI_PEER_CONNECTION_FAILURE: EventPriority.NORMAL,
+    EventType.JITSI_SUSPEND_DETECTED: EventPriority.NORMAL,
+    EventType.JITSI_TOOLBAR_BUTTON_CLICKED: EventPriority.NORMAL,
 }
 
 # Event type to schema version mapping
@@ -132,12 +165,29 @@ EVENT_SCHEMA_VERSIONS: dict[EventType, str] = {
     EventType.MEETING_URL_DELETED: "v1",
     EventType.NOTIFICATION_EMAIL_SENT: "v1",
     EventType.NOTIFICATION_TELEGRAM_SENT: "v1",
+    EventType.NOTIFICATION_SEND_REQUESTED: "v1",
+    EventType.NOTIFICATION_PUSH_SENT: "v1",
     EventType.UNISENDER_STATUS_CREATED: "v1",
+    EventType.GETSTREAM_CHANNEL_CREATED: "v1",
+    EventType.GETSTREAM_CHANNEL_DELETED: "v1",
     EventType.GETSTREAM_MESSAGE_NEW: "v1",
     EventType.GETSTREAM_MESSAGE_UPDATED: "v1",
     EventType.GETSTREAM_MESSAGE_DELETED: "v1",
     EventType.GETSTREAM_MESSAGE_READ: "v1",
-    EventType.JITSI_ROOM_CREATED: "v1",
+    EventType.JITSI_CONFERENCE_JOINED: "v1",
+    EventType.JITSI_CONFERENCE_LEFT: "v1",
     EventType.JITSI_PARTICIPANT_JOINED: "v1",
     EventType.JITSI_PARTICIPANT_LEFT: "v1",
+    EventType.JITSI_PARTICIPANT_MUTED: "v1",
+    EventType.JITSI_PARTICIPANT_MENU_BUTTON_CLICK: "v1",
+    EventType.JITSI_AUDIO_MUTE_STATUS_CHANGED: "v1",
+    EventType.JITSI_VIDEO_MUTE_STATUS_CHANGED: "v1",
+    EventType.JITSI_SPEAKER_DOMINANT_CHANGED: "v1",
+    EventType.JITSI_DEVICE_LIST_CHANGED: "v1",
+    EventType.JITSI_CAMERA_ERROR: "v1",
+    EventType.JITSI_MIC_ERROR: "v1",
+    EventType.JITSI_ERROR_OCCURRED: "v1",
+    EventType.JITSI_PEER_CONNECTION_FAILURE: "v1",
+    EventType.JITSI_SUSPEND_DETECTED: "v1",
+    EventType.JITSI_TOOLBAR_BUTTON_CLICKED: "v1",
 }

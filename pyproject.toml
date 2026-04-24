@@ -1,6 +1,6 @@
 [project]
 name = "event-schemas"
-version = "0.1.0"
+version = "0.1.5"
 description = "Shared event schemas for event-receiver and event-saver"
 authors = [
     {name = "Your Name", email = "your.email@example.com"}
@@ -34,3 +34,8 @@ python_version = "3.14"
 strict = true
 warn_return_any = true
 warn_unused_configs = true
+
+[dependency-groups]
+dev = [
+    "code-review-graph>=2.3.1",
+]

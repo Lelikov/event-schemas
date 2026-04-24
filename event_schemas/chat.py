@@ -9,10 +9,14 @@ class ChatCreatedPayload(BaseModel):
     organizer_id: str = Field(..., description="GetStream user ID of organizer")
     client_id: str = Field(..., description="GetStream user ID of client")
 
-    model_config = {"json_schema_extra": {"example": {
-        "organizer_id": "user_123",
-        "client_id": "user_456",
-    }}}
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "organizer_id": "user_123",
+                "client_id": "user_456",
+            }
+        }
+    }
 
 
 class ChatDeletedPayload(BaseModel):
