@@ -39,14 +39,16 @@ from event_schemas.types import (
     TriggerEvent,
     UserInfo,
 )
+from event_schemas.user import BookingClientReassignedPayload, UserEmailChangeRequestedPayload
 
 __version__ = "0.1.0"
 
 __all__ = [
     "EVENT_PRIORITIES",
     "EVENT_SCHEMA_VERSIONS",
-    "BookingCancelledPayload",
     # Booking
+    "BookingCancelledPayload",
+    "BookingClientReassignedPayload",
     "BookingCreatedPayload",
     "BookingReassignedPayload",
     "BookingReminderSentPayload",
@@ -81,5 +83,6 @@ __all__ = [
     "TriggerEvent",
     # External
     "UniSenderStatusPayload",
+    "UserEmailChangeRequestedPayload",
     "UserInfo",
 ]

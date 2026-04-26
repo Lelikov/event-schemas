@@ -8,6 +8,7 @@ from pydantic import BaseModel, EmailStr
 class SourceType(StrEnum):
     """Event source identifiers."""
 
+    ADMIN = "admin"
     BOOKING = "booking"
     GETSTREAM = "getstream"
     UNISENDER_GO = "unisender-go"
@@ -23,6 +24,7 @@ class EventType(str, Enum):
     BOOKING_REASSIGNED = "booking.reassigned"
     BOOKING_CANCELLED = "booking.cancelled"
     BOOKING_REMINDER_SENT = "booking.reminder_sent"
+    BOOKING_CLIENT_REASSIGNED = "booking.client_reassigned"
 
     # Chat lifecycle
     CHAT_CREATED = "chat.created"
@@ -38,6 +40,9 @@ class EventType(str, Enum):
     NOTIFICATION_TELEGRAM_SENT = "notification.telegram.message_sent"
     NOTIFICATION_SEND_REQUESTED = "notification.send_requested"
     NOTIFICATION_PUSH_SENT = "notification.push.message_sent"
+
+    # User management
+    USER_EMAIL_CHANGE_REQUESTED = "user.email.change_requested"
 
     # External integrations
     UNISENDER_STATUS_CREATED = "unisender.events.v1.transactional.status.create"
@@ -118,6 +123,9 @@ EVENT_PRIORITIES: dict[EventType, EventPriority] = {
     EventType.NOTIFICATION_SEND_REQUESTED: EventPriority.HIGH,
     EventType.NOTIFICATION_PUSH_SENT: EventPriority.HIGH,
     EventType.BOOKING_REMINDER_SENT: EventPriority.HIGH,
+    EventType.BOOKING_CLIENT_REASSIGNED: EventPriority.CRITICAL,
+    # Critical: user management
+    EventType.USER_EMAIL_CHANGE_REQUESTED: EventPriority.CRITICAL,
     # Normal: chat and meeting
     EventType.CHAT_CREATED: EventPriority.NORMAL,
     EventType.CHAT_DELETED: EventPriority.NORMAL,
@@ -158,6 +166,7 @@ EVENT_SCHEMA_VERSIONS: dict[EventType, str] = {
     EventType.BOOKING_REASSIGNED: "v1",
     EventType.BOOKING_CANCELLED: "v1",
     EventType.BOOKING_REMINDER_SENT: "v1",
+    EventType.BOOKING_CLIENT_REASSIGNED: "v1",
     EventType.CHAT_CREATED: "v1",
     EventType.CHAT_DELETED: "v1",
     EventType.CHAT_MESSAGE_SENT: "v1",
@@ -167,6 +176,7 @@ EVENT_SCHEMA_VERSIONS: dict[EventType, str] = {
     EventType.NOTIFICATION_TELEGRAM_SENT: "v1",
     EventType.NOTIFICATION_SEND_REQUESTED: "v1",
     EventType.NOTIFICATION_PUSH_SENT: "v1",
+    EventType.USER_EMAIL_CHANGE_REQUESTED: "v1",
     EventType.UNISENDER_STATUS_CREATED: "v1",
     EventType.GETSTREAM_CHANNEL_CREATED: "v1",
     EventType.GETSTREAM_CHANNEL_DELETED: "v1",
