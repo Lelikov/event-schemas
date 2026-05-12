@@ -111,3 +111,27 @@ class BookingReminderSentPayload(BaseModel):
             }
         }
     }
+
+
+class BookingRejectedPayload(BaseModel):
+    """Payload for booking.rejected event."""
+
+    client_email: EmailStr = Field(..., description="Client email address")
+    rejection_type: str | None = Field(None, description="Type: month_limit, year_limit, min_interval")
+    rejection_reasons: list[str] = Field(default_factory=list, description="Human-readable rejection reasons")
+    available_from: datetime | None = Field(None, description="Earliest available booking time")
+    has_active_booking: bool = Field(False, description="Whether client has an active future booking")
+    active_booking_start: datetime | None = Field(None, description="Start time of the active booking if exists")
+
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "client_email": "client@example.com",
+                "rejection_type": "month_limit",
+                "rejection_reasons": ["Monthly booking limit reached"],
+                "available_from": "2024-04-01T00:00:00Z",
+                "has_active_booking": False,
+                "active_booking_start": None,
+            }
+        }
+    }

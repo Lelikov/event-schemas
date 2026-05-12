@@ -25,6 +25,7 @@ class EventType(str, Enum):
     BOOKING_CANCELLED = "booking.cancelled"
     BOOKING_REMINDER_SENT = "booking.reminder_sent"
     BOOKING_CLIENT_REASSIGNED = "booking.client_reassigned"
+    BOOKING_REJECTED = "booking.rejected"
 
     # Chat lifecycle
     CHAT_CREATED = "chat.created"
@@ -124,6 +125,7 @@ EVENT_PRIORITIES: dict[EventType, EventPriority] = {
     EventType.NOTIFICATION_PUSH_SENT: EventPriority.HIGH,
     EventType.BOOKING_REMINDER_SENT: EventPriority.HIGH,
     EventType.BOOKING_CLIENT_REASSIGNED: EventPriority.CRITICAL,
+    EventType.BOOKING_REJECTED: EventPriority.CRITICAL,
     # Critical: user management
     EventType.USER_EMAIL_CHANGE_REQUESTED: EventPriority.CRITICAL,
     # Normal: chat and meeting
@@ -167,6 +169,7 @@ EVENT_SCHEMA_VERSIONS: dict[EventType, str] = {
     EventType.BOOKING_CANCELLED: "v1",
     EventType.BOOKING_REMINDER_SENT: "v1",
     EventType.BOOKING_CLIENT_REASSIGNED: "v1",
+    EventType.BOOKING_REJECTED: "v1",
     EventType.CHAT_CREATED: "v1",
     EventType.CHAT_DELETED: "v1",
     EventType.CHAT_MESSAGE_SENT: "v1",

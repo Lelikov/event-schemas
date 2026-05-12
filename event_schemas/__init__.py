@@ -4,6 +4,7 @@ from event_schemas.booking import (
     BookingCancelledPayload,
     BookingCreatedPayload,
     BookingReassignedPayload,
+    BookingRejectedPayload,
     BookingReminderSentPayload,
     BookingRescheduledPayload,
 )
@@ -51,6 +52,7 @@ __all__ = [
     "BookingClientReassignedPayload",
     "BookingCreatedPayload",
     "BookingReassignedPayload",
+    "BookingRejectedPayload",
     "BookingReminderSentPayload",
     "BookingRescheduledPayload",
     # Chat
