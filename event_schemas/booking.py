@@ -1,10 +1,20 @@
-"""Booking event payload schemas."""
+"""Booking event payload schemas (the ``original`` section of the envelope)."""
 
 from datetime import datetime
 
 from pydantic import BaseModel, EmailStr, Field
 
 from event_schemas.types import ClientInfo, UserInfo
+
+
+class BookingParticipant(BaseModel):
+    """A participant entry in the ``users`` list of booking lifecycle payloads."""
+
+    email: EmailStr = Field(..., description="Participant email address")
+    role: str | None = Field(None, description="organizer | client | previous_organizer")
+    time_zone: str | None = Field(None, description="IANA time zone, if known")
+
+    model_config = {"json_schema_extra": {"example": {"email": "organizer@example.com", "role": "organizer"}}}
 
 
 class BookingCreatedPayload(BaseModel):
@@ -32,25 +42,32 @@ class BookingCreatedPayload(BaseModel):
 
 
 class BookingRescheduledPayload(BaseModel):
-    """Payload for booking.rescheduled event."""
+    """Payload for booking.rescheduled event.
 
-    volunteer_id: str = Field(..., description="Organizer (volunteer) UUID")
-    client_id: str = Field(..., description="Client UUID")
+    cal.com mints a NEW booking uid on reschedule: the CloudEvent ``bookingid``
+    attribute carries the NEW uid, ``previous_booking_uid`` carries the old one
+    (cal.com ``rescheduleUid``) so consumers can link booking identities.
+    """
+
+    users: list[BookingParticipant] = Field(default_factory=list, description="Organizer and client")
     start_time: datetime = Field(..., description="New booking start time")
     end_time: datetime = Field(..., description="New booking end time")
-    previous_booking: dict[str, datetime | None] = Field(
-        default_factory=dict,
-        description="Previous booking details",
-    )
+    previous_start_time: datetime | None = Field(None, description="Previous booking start time")
+    previous_booking_uid: str | None = Field(None, description="Old booking uid (cal.com rescheduleUid)")
+    rescheduled_by: str | None = Field(None, description="Email of the actor who rescheduled")
 
     model_config = {
         "json_schema_extra": {
             "example": {
-                "volunteer_id": "550e8400-e29b-41d4-a716-446655440001",
-                "client_id": "550e8400-e29b-41d4-a716-446655440002",
+                "users": [
+                    {"email": "organizer@example.com", "role": "organizer"},
+                    {"email": "client@example.com", "role": "client"},
+                ],
                 "start_time": "2024-03-02T10:00:00Z",
                 "end_time": "2024-03-02T11:00:00Z",
-                "previous_booking": {"start_time": "2024-03-01T10:00:00Z"},
+                "previous_start_time": "2024-03-01T10:00:00Z",
+                "previous_booking_uid": "xaYwx8FnWLR2ZSvT8vg4WA",
+                "rescheduled_by": "organizer@example.com",
             }
         }
     }
@@ -59,21 +76,21 @@ class BookingRescheduledPayload(BaseModel):
 class BookingReassignedPayload(BaseModel):
     """Payload for booking.reassigned event."""
 
-    volunteer_id: str = Field(..., description="New organizer (volunteer) UUID")
-    client_id: str = Field(..., description="Client UUID")
-    previous_organizer: dict[str, str | None] = Field(
-        default_factory=dict,
-        description="Previous organizer information",
+    users: list[BookingParticipant] = Field(
+        default_factory=list,
+        description="New organizer, client and previous_organizer entries",
     )
-    user: UserInfo = Field(..., description="New organizer information")
+    previous_organizer_email: EmailStr | None = Field(None, description="Email of the previous organizer")
 
     model_config = {
         "json_schema_extra": {
             "example": {
-                "volunteer_id": "550e8400-e29b-41d4-a716-446655440003",
-                "client_id": "550e8400-e29b-41d4-a716-446655440002",
-                "previous_organizer": {"email": "old.organizer@example.com"},
-                "user": {"email": "new.organizer@example.com"},
+                "users": [
+                    {"email": "new.organizer@example.com", "role": "organizer"},
+                    {"email": "client@example.com", "role": "client"},
+                    {"email": "old.organizer@example.com", "role": "previous_organizer"},
+                ],
+                "previous_organizer_email": "old.organizer@example.com",
             }
         }
     }
@@ -82,25 +99,28 @@ class BookingReassignedPayload(BaseModel):
 class BookingCancelledPayload(BaseModel):
     """Payload for booking.cancelled event."""
 
-    volunteer_id: str = Field(..., description="Organizer (volunteer) UUID")
-    client_id: str = Field(..., description="Client UUID")
+    users: list[BookingParticipant] = Field(default_factory=list, description="Organizer and client")
     cancellation_reason: str | None = Field(None, description="Reason for cancellation")
+    cancelled_by: str | None = Field(None, description="Email of the actor who cancelled")
 
     model_config = {
         "json_schema_extra": {
             "example": {
-                "volunteer_id": "550e8400-e29b-41d4-a716-446655440001",
-                "client_id": "550e8400-e29b-41d4-a716-446655440002",
+                "users": [
+                    {"email": "organizer@example.com", "role": "organizer"},
+                    {"email": "client@example.com", "role": "client"},
+                ],
                 "cancellation_reason": "Client request",
+                "cancelled_by": "client@example.com",
             }
         }
     }
 
 
 class BookingReminderSentPayload(BaseModel):
-    """Payload for booking.reminder_sent event."""
+    """Payload for booking.reminder_sent event (no producer today; kept for saver routing)."""
 
-    client_id: str = Field(..., description="Client UUID")
+    client_id: str | None = Field(None, description="Client UUID")
     email: EmailStr = Field(..., description="Email address where reminder was sent")
 
     model_config = {

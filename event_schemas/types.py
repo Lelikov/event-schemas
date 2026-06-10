@@ -105,10 +105,8 @@ class UserInfo(BaseModel):
     time_zone: str | None = None
 
 
-class ClientInfo(BaseModel):
-    """Client information (extends UserInfo for future fields)."""
-
-    email: EmailStr
+class ClientInfo(UserInfo):
+    """Client information (extends UserInfo; inherits email and time_zone)."""
 
 
 # Event type to priority mapping

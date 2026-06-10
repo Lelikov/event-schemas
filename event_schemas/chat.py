@@ -1,29 +1,22 @@
-"""Chat event payload schemas."""
+"""Chat event payload schemas (the ``original`` section of the envelope)."""
 
 from pydantic import BaseModel, Field
 
 
 class ChatCreatedPayload(BaseModel):
-    """Payload for chat.created event."""
+    """Payload for chat.created event (published by event-booking after GetStream channel creation)."""
 
-    organizer_id: str = Field(..., description="GetStream user ID of organizer")
-    client_id: str = Field(..., description="GetStream user ID of client")
+    channel_id: str = Field(..., description="GetStream channel id (== booking uid)")
 
-    model_config = {
-        "json_schema_extra": {
-            "example": {
-                "organizer_id": "user_123",
-                "client_id": "user_456",
-            }
-        }
-    }
+    model_config = {"json_schema_extra": {"example": {"channel_id": "n3FHda8Cpy48QW4JZX9th7"}}}
 
 
 class ChatDeletedPayload(BaseModel):
     """Payload for chat.deleted event."""
 
-    # Empty payload - booking_id in CloudEvent attributes is sufficient
-    model_config = {"json_schema_extra": {"example": {}}}
+    channel_id: str = Field(..., description="GetStream channel id (== booking uid)")
+
+    model_config = {"json_schema_extra": {"example": {"channel_id": "n3FHda8Cpy48QW4JZX9th7"}}}
 
 
 class ChatMessageSentPayload(BaseModel):
