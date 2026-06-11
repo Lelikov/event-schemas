@@ -41,9 +41,7 @@ class GetStreamEventPayload(BaseModel):
     message: dict[str, Any] | None = Field(None, description="Message object (for message events)")
     members: list[dict] | None = Field(None, description="Members object")
 
-    # Allow additional fields
-    extra: dict[str, Any] = Field(default_factory=dict, description="Additional GetStream fields")
-
+    # Unknown upstream fields are kept via extra="allow" (model.__pydantic_extra__).
     model_config = {
         "extra": "allow",
         "json_schema_extra": {
@@ -67,9 +65,7 @@ class JitsiEventPayload(BaseModel):
 
     room: str | None = Field(None, description="Jitsi room name (booking_id)")
     event_type: str | None = Field(None, description="Jitsi event type")
-    # Allow additional fields from JWT claims
-    extra: dict[str, Any] = Field(default_factory=dict, description="Additional Jitsi/JWT fields")
-
+    # Unknown upstream/JWT-claim fields are kept via extra="allow" (model.__pydantic_extra__).
     model_config = {
         "extra": "allow",
         "json_schema_extra": {
