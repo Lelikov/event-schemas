@@ -5,7 +5,7 @@ event-receiver wraps EVERY published payload as::
     {
         "original": {...},      # domain payload, exactly as produced
         "normalized": {
-            "participants": [{"email", "role", "time_zone", "user_id"}, ...]
+            "participants": [{"email", "role", "time_zone", "locale", "user_id"}, ...]
         }
     }
 
@@ -30,6 +30,7 @@ class EnvelopeParticipant(BaseModel):
     email: str
     role: str | None = None
     time_zone: str | None = None
+    locale: str | None = None  # BCP-47-ish language tag from the producer (e.g. "ru", "en"); None = unknown
     user_id: str | None = None
 
     model_config = {"extra": "allow"}

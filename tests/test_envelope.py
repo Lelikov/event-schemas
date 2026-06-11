@@ -60,6 +60,24 @@ def test_envelope_parse_payload_validates_original_against_model() -> None:
     assert payload.template_data == {"title": "Session"}
 
 
+def test_envelope_participant_carries_optional_locale() -> None:
+    envelope = EventEnvelope.model_validate(
+        {
+            "original": {},
+            "normalized": {
+                "participants": [
+                    {"email": "org@example.com", "role": "organizer", "locale": "ru"},
+                    {"email": "cli@example.com", "role": "client"},
+                ]
+            },
+        }
+    )
+
+    participants = envelope.normalized.participants
+    assert participants[0].locale == "ru"
+    assert participants[1].locale is None
+
+
 def test_envelope_defaults_when_sections_missing() -> None:
     envelope = EventEnvelope.model_validate({})
 

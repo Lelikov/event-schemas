@@ -53,12 +53,14 @@ class NotificationRecipient(BaseModel):
 
     email: EmailStr = Field(..., description="Recipient email address")
     role: RecipientRole = Field(..., description="Recipient role in booking context")
+    locale: str | None = Field(None, description="Preferred language tag (e.g. 'ru', 'en'), if known")
 
     model_config = {
         "json_schema_extra": {
             "example": {
                 "email": "organizer@example.com",
                 "role": "organizer",
+                "locale": "ru",
             }
         }
     }

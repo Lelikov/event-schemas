@@ -243,6 +243,7 @@ Note: Orphaned -- not wired to any `EventType` member.
 |-------|------|---------|
 | `email` | `EmailStr` | required |
 | `role` | `RecipientRole` | required |
+| `locale` | `str \| None` | `None` (preferred language tag, e.g. `"ru"`, `"en"`) |
 
 ### NotificationCommandPayload (`notification.py:102-132`)
 
@@ -310,6 +311,7 @@ These are `TypedDict` classes. They provide structural typing only -- **no runti
 | `email` | `str` | yes |
 | `role` | `str \| None` | no (`NotRequired`) |
 | `time_zone` | `str \| None` | no (`NotRequired`) |
+| `locale` | `str \| None` | no (`NotRequired`; language tag, e.g. `"ru"`) |
 | `user_id` | `str` | no (`NotRequired`) |
 
 ### NormalizedBooking (`normalized.py:25-30`)

@@ -13,6 +13,7 @@ class BookingParticipant(BaseModel):
     email: EmailStr = Field(..., description="Participant email address")
     role: str | None = Field(None, description="organizer | client | previous_organizer")
     time_zone: TimeZoneName | None = Field(None, description="IANA time zone, if known")
+    locale: str | None = Field(None, description="Preferred language tag (e.g. 'ru', 'en'), if known")
 
     model_config = {"json_schema_extra": {"example": {"email": "organizer@example.com", "role": "organizer"}}}
 

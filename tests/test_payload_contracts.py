@@ -13,6 +13,7 @@ from pydantic import ValidationError
 from event_schemas.booking import BookingCreatedPayload, BookingParticipant, BookingReminderSentPayload
 from event_schemas.envelope import EventEnvelope
 from event_schemas.mapping import PAYLOAD_MODELS
+from event_schemas.notification import NotificationRecipient
 from event_schemas.types import EVENT_PRIORITIES, EVENT_SCHEMA_VERSIONS, EventType, UserInfo
 from event_schemas.user import BookingClientReassignedPayload, UserEmailChangeRequestedPayload
 
@@ -96,6 +97,16 @@ def test_booking_participant_time_zone_optional() -> None:
     participant = BookingParticipant(email="org@example.com")
 
     assert participant.time_zone is None
+
+
+def test_booking_participant_locale_optional() -> None:
+    assert BookingParticipant(email="org@example.com").locale is None
+    assert BookingParticipant(email="org@example.com", locale="ru").locale == "ru"
+
+
+def test_notification_recipient_locale_optional() -> None:
+    assert NotificationRecipient(email="cli@example.com", role="client").locale is None
+    assert NotificationRecipient(email="cli@example.com", role="client", locale="en").locale == "en"
 
 
 # --- UUID string validation ---
