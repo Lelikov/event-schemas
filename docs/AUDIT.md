@@ -1,6 +1,6 @@
 # event-schemas Audit Findings
 
-Audited: 2026-04-20
+Audited: 2026-04-20. Updated: 2026-06-11 (audit-v2 fixes on branch `audit-fixes`).
 
 ---
 
@@ -87,12 +87,12 @@ Recommendation: Either validate email format in the normalizer before insertion,
 
 ## MEDIUM
 
-### [MEDIUM-1] No IANA timezone validator exists despite CLAUDE.md claiming one
+### [MEDIUM-1] ~~No IANA timezone validator exists despite CLAUDE.md claiming one~~ — RESOLVED (audit-v2, 2026-06-11)
 
 Services affected: event-schemas
 Location: `event-schemas/event_schemas/types.py`, `event-schemas/CLAUDE.md:48`
 Description: CLAUDE.md states "timezone fields use an IANA pattern validator," but no such validator exists anywhere in the codebase. `UserInfo` does not even have a `time_zone` field, and `NormalizedParticipant.time_zone` is typed as `str | None` with no validation.
-Recommendation: If timezone fields are expected, add an IANA timezone validator (e.g., using `zoneinfo.available_timezones()` or a regex pattern). Update CLAUDE.md if the convention is aspirational rather than implemented.
+Resolution: `TimeZoneName` (Annotated `str` with an `AfterValidator` that resolves the name via `zoneinfo.ZoneInfo`) is defined in `types.py` and applied to `UserInfo.time_zone` and `BookingParticipant.time_zone`. `EnvelopeParticipant.time_zone` stays a lenient `str | None` by design (consumer-side parsing must tolerate in-flight legacy messages). CLAUDE.md now describes the real mechanism.
 
 ---
 
@@ -123,12 +123,12 @@ Recommendation: Add `BOOKING_RESCHEDULED` to event-saver's EventType enum.
 
 ---
 
-### [MEDIUM-5] GetStreamEventPayload uses both explicit `extra` field and `model_config extra="allow"`
+### [MEDIUM-5] ~~GetStreamEventPayload uses both explicit `extra` field and `model_config extra="allow"`~~ — RESOLVED (audit-v2, 2026-06-11)
 
 Services affected: event-schemas
 Location: `event-schemas/event_schemas/external.py:28-52`
 Description: `GetStreamEventPayload` declares an explicit `extra: dict[str, Any]` field AND sets `model_config = {"extra": "allow"}`. These serve different purposes: the explicit field captures known extras, while `extra="allow"` lets Pydantic accept any additional top-level fields. The result is confusing -- extra fields from the webhook end up in `model.__pydantic_extra__`, not in the explicit `extra` dict field. The explicit `extra` field is never populated by webhook data.
-Recommendation: Remove the explicit `extra` field (it will never be populated by incoming data) or remove `extra="allow"` and document that unknown fields should be passed via the `extra` dict.
+Resolution: The explicit `extra` field was removed from both `GetStreamEventPayload` and `JitsiEventPayload` (same defect); `extra="allow"` is the single mechanism — unknown upstream fields land in `model.__pydantic_extra__`. No producer or consumer ever populated/read the explicit field (verified by grep across event-receiver/saver/notifier/users/booking).
 
 ---
 
@@ -143,21 +143,21 @@ Recommendation: Make `ClientInfo` inherit from `UserInfo`, or merge them into a 
 
 ## LOW
 
-### [LOW-1] No test suite for event-schemas
+### [LOW-1] ~~No test suite for event-schemas~~ — RESOLVED (audit-v2, 2026-06-11)
 
 Services affected: event-schemas
 Location: `event-schemas/CLAUDE.md`
 Description: CLAUDE.md explicitly states "No test suite exists -- this is a schema library relying on strict typing for correctness." However, several findings in this audit (missing fields, missing map entries, typos) demonstrate that typing alone does not catch all issues. Schema completeness, map coverage, and enum-to-model mapping are all testable properties.
-Recommendation: Add a minimal test suite that asserts: (a) every EventType has entries in EVENT_PRIORITIES and EVENT_SCHEMA_VERSIONS, (b) every EventType has a corresponding Pydantic model, (c) all enum member names are correctly spelled.
+Resolution: `tests/` now contains 73 tests: envelope round-trip + unwrap (`test_envelope.py`), queue/topology invariants (`test_queues.py`), payload-mapping basics (`test_mapping.py`), and contract completeness + wire-format fidelity (`test_payload_contracts.py`: every EventType has a payload model, priority and schema version; every mapped model's documented example round-trips through the canonical envelope JSON; validator behavior for `TimeZoneName`/`UuidStr`).
 
 ---
 
-### [LOW-2] BookingCreatedPayload.volunteer_id / client_id are `str`, not UUID-validated
+### [LOW-2] ~~BookingCreatedPayload.volunteer_id / client_id are `str`, not UUID-validated~~ — RESOLVED (audit-v2, 2026-06-11)
 
 Services affected: event-schemas
 Location: `event-schemas/event_schemas/booking.py:13-14`
 Description: `volunteer_id` and `client_id` are typed as `str` with description "UUID" but no UUID format validation. Invalid UUID strings will pass validation.
-Recommendation: Use `pydantic.UUID4` or `uuid.UUID` type annotation if UUID format is required.
+Resolution: `UuidStr` (Annotated `str` validated via `uuid.UUID`) is applied to `BookingCreatedPayload.volunteer_id/client_id`, `BookingReminderSentPayload.client_id`, `UserEmailChangeRequestedPayload.user_id` and `BookingClientReassignedPayload.new_client_user_id`. Producer check (read-only): event-admin publishes real event-users UUIDs for `user_id`/`new_client_user_id`; cal.com webhooks observed in production (`event-booking/requests.jsonl`) never carry `volunteer_id`/`client_id`, and the fields stay optional, so pass-through ingest is unaffected. Wire format remains `str` (no breaking change).
 
 ---
 

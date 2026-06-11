@@ -103,13 +103,13 @@ All exports are defined in `event_schemas/__init__.py:44-83`.
 | Field | Type | Default | Notes |
 |-------|------|---------|-------|
 | `email` | `EmailStr` | required | |
-| `time_zone` | `str \| None` | `None` | IANA timezone; no runtime validation (audit MEDIUM-1) |
+| `time_zone` | `TimeZoneName \| None` | `None` | IANA timezone, validated against the zoneinfo database |
 
 ### ClientInfo (`types.py:80-83`)
 
 | Field | Type | Default | Notes |
 |-------|------|---------|-------|
-| `email` | `EmailStr` | required | Structurally identical to UserInfo; does not inherit from it |
+| `email` | `EmailStr` | required | Inherits from UserInfo (email + time_zone) |
 
 ---
 
@@ -119,8 +119,8 @@ All exports are defined in `event_schemas/__init__.py:44-83`.
 
 | Field | Type | Default |
 |-------|------|---------|
-| `volunteer_id` | `str \| None` | `None` |
-| `client_id` | `str \| None` | `None` |
+| `volunteer_id` | `UuidStr \| None` | `None` |
+| `client_id` | `UuidStr \| None` | `None` |
 | `user` | `UserInfo` | required |
 | `client` | `ClientInfo` | required |
 | `start_time` | `datetime` | required |
@@ -159,7 +159,7 @@ Note: Missing `user`/`client` fields that the normalizer expects (audit LOW-3).
 
 | Field | Type | Default |
 |-------|------|---------|
-| `client_id` | `str` | required |
+| `client_id` | `UuidStr \| None` | `None` |
 | `email` | `EmailStr` | required |
 
 ---
@@ -243,6 +243,7 @@ Note: Orphaned -- not wired to any `EventType` member.
 |-------|------|---------|
 | `email` | `EmailStr` | required |
 | `role` | `RecipientRole` | required |
+| `locale` | `str \| None` | `None` (preferred language tag, e.g. `"ru"`, `"en"`) |
 
 ### NotificationCommandPayload (`notification.py:102-132`)
 
@@ -267,7 +268,7 @@ Note: Orphaned -- not wired to any `EventType` member.
 
 ## External Payloads (`external.py`)
 
-All models in this module use `model_config = {"extra": "allow"}` to accept arbitrary fields from third-party webhooks. Unknown top-level fields land in `model.__pydantic_extra__` (not in the explicit `extra` dict field -- see audit MEDIUM-5).
+All models in this module use `model_config = {"extra": "allow"}` to accept arbitrary fields from third-party webhooks. Unknown top-level fields land in `model.__pydantic_extra__`; there is no explicit `extra` field (audit MEDIUM-5 resolved: single mechanism).
 
 ### UniSenderStatusPayload (`external.py:8-29`)
 
@@ -285,7 +286,6 @@ All models in this module use `model_config = {"extra": "allow"}` to accept arbi
 | `user` | `dict[str, Any] \| None` | `None` |
 | `message` | `dict[str, Any] \| None` | `None` |
 | `members` | `list[dict] \| None` | `None` |
-| `extra` | `dict[str, Any]` | `{}` |
 
 Config: `extra = "allow"` -- additional webhook fields accepted at top level.
 
@@ -295,7 +295,6 @@ Config: `extra = "allow"` -- additional webhook fields accepted at top level.
 |-------|------|---------|
 | `room` | `str \| None` | `None` |
 | `event_type` | `str \| None` | `None` |
-| `extra` | `dict[str, Any]` | `{}` |
 
 Config: `extra = "allow"` -- additional JWT claim fields accepted at top level.
 
@@ -312,6 +311,7 @@ These are `TypedDict` classes. They provide structural typing only -- **no runti
 | `email` | `str` | yes |
 | `role` | `str \| None` | no (`NotRequired`) |
 | `time_zone` | `str \| None` | no (`NotRequired`) |
+| `locale` | `str \| None` | no (`NotRequired`; language tag, e.g. `"ru"`) |
 | `user_id` | `str` | no (`NotRequired`) |
 
 ### NormalizedBooking (`normalized.py:25-30`)

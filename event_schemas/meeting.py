@@ -1,4 +1,4 @@
-"""Meeting event payload schemas."""
+"""Meeting event payload schemas (the ``original`` section of the envelope)."""
 
 from pydantic import AnyHttpUrl, BaseModel, EmailStr, Field
 
@@ -10,7 +10,7 @@ class MeetingUrlCreatedPayload(BaseModel):
 
     email: EmailStr = Field(..., description="Recipient email address")
     recipient_role: RecipientRole = Field(..., description="Recipient role (organizer or client)")
-    meeting_url: AnyHttpUrl = Field(..., description="Meeting URL (Jitsi, Zoom, etc.)")
+    meeting_url: AnyHttpUrl = Field(..., description="Meeting URL (Jitsi short link)")
 
     model_config = {
         "json_schema_extra": {
@@ -26,6 +26,7 @@ class MeetingUrlCreatedPayload(BaseModel):
 class MeetingUrlDeletedPayload(BaseModel):
     """Payload for meeting.url_deleted event."""
 
+    email: EmailStr = Field(..., description="Recipient email address")
     recipient_role: RecipientRole = Field(..., description="Recipient role (organizer or client)")
 
-    model_config = {"json_schema_extra": {"example": {"recipient_role": "organizer"}}}
+    model_config = {"json_schema_extra": {"example": {"email": "organizer@example.com", "recipient_role": "organizer"}}}

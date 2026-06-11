@@ -2,12 +2,14 @@
 
 from pydantic import BaseModel, EmailStr, Field
 
+from event_schemas.types import UuidStr
+
 
 class BookingClientReassignedPayload(BaseModel):
     """Payload for booking.client_reassigned event."""
 
     booking_uid: str = Field(..., description="Booking identifier")
-    new_client_user_id: str = Field(..., description="UUID of the new client user")
+    new_client_user_id: UuidStr = Field(..., description="UUID of the new client user")
     requested_by: str = Field(..., description="Admin email who requested the reassignment")
 
     model_config = {
@@ -24,7 +26,7 @@ class BookingClientReassignedPayload(BaseModel):
 class UserEmailChangeRequestedPayload(BaseModel):
     """Payload for user.email.change_requested event."""
 
-    user_id: str = Field(..., description="UUID of the client user")
+    user_id: UuidStr = Field(..., description="UUID of the client user")
     old_email: EmailStr = Field(..., description="Current email before change")
     new_email: EmailStr = Field(..., description="New email to set")
     requested_by: str = Field(..., description="Admin email who requested the change")
