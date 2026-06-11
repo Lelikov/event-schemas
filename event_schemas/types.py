@@ -1,8 +1,38 @@
 """Core types and enums for event schemas."""
 
 from enum import Enum, StrEnum
+from typing import Annotated
+from uuid import UUID
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
-from pydantic import BaseModel, EmailStr
+from pydantic import AfterValidator, BaseModel, EmailStr
+
+
+def _validate_iana_time_zone(value: str) -> str:
+    """Reject strings that are not valid IANA time zone names (e.g. 'Europe/Madrid')."""
+    try:
+        ZoneInfo(value)
+    except (ZoneInfoNotFoundError, ValueError) as exc:
+        message = f"{value!r} is not a valid IANA time zone"
+        raise ValueError(message) from exc
+    return value
+
+
+def _validate_uuid_str(value: str) -> str:
+    """Reject strings that are not valid UUIDs (kept as str on the wire)."""
+    try:
+        UUID(value)
+    except ValueError as exc:
+        message = f"{value!r} is not a valid UUID"
+        raise ValueError(message) from exc
+    return value
+
+
+TimeZoneName = Annotated[str, AfterValidator(_validate_iana_time_zone)]
+"""IANA time zone name, validated against the zoneinfo database."""
+
+UuidStr = Annotated[str, AfterValidator(_validate_uuid_str)]
+"""UUID in string form (wire format stays str; format is validated)."""
 
 
 class SourceType(StrEnum):
@@ -102,7 +132,7 @@ class UserInfo(BaseModel):
     """User information (organizer or client)."""
 
     email: EmailStr
-    time_zone: str | None = None
+    time_zone: TimeZoneName | None = None
 
 
 class ClientInfo(UserInfo):

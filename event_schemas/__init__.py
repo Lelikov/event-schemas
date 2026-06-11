@@ -63,8 +63,10 @@ from event_schemas.types import (
     EventType,
     RecipientRole,
     SourceType,
+    TimeZoneName,
     TriggerEvent,
     UserInfo,
+    UuidStr,
 )
 from event_schemas.user import BookingClientReassignedPayload, UserEmailChangeRequestedPayload
 
@@ -130,10 +132,12 @@ __all__ = [
     "RoutingRuleSpec",
     "SourceType",
     "TelegramNotificationPayload",
+    "TimeZoneName",
     "TriggerEvent",
     # External
     "UniSenderStatusPayload",
     "UserEmailChangeRequestedPayload",
     "UserInfo",
+    "UuidStr",
     "unwrap_payload",
 ]

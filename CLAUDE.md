@@ -41,7 +41,7 @@ This is a **shared Python package** providing type-safe event schemas consumed b
 ### Key conventions
 
 - All event payloads inherit from Pydantic `BaseModel` with strict type annotations.
-- Email fields use `EmailStr`; timezone fields use an IANA pattern validator.
+- Email fields use `EmailStr`; timezone fields use `TimeZoneName` (validated against the zoneinfo IANA database); UUID-carrying id fields use `UuidStr` (str on the wire, UUID-format validated).
 - Schema versions live in `EVENT_SCHEMA_VERSIONS` and follow semver semantics (bump major for breaking changes).
 - External webhook models (UniSender, GetStream, Jitsi) set `model_config = ConfigDict(extra="allow")` to handle variable upstream payloads.
 - Python ≥ 3.14 is required; Ruff line length is 120.

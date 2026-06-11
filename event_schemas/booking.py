@@ -4,7 +4,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, EmailStr, Field
 
-from event_schemas.types import ClientInfo, UserInfo
+from event_schemas.types import ClientInfo, TimeZoneName, UserInfo, UuidStr
 
 
 class BookingParticipant(BaseModel):
@@ -12,7 +12,7 @@ class BookingParticipant(BaseModel):
 
     email: EmailStr = Field(..., description="Participant email address")
     role: str | None = Field(None, description="organizer | client | previous_organizer")
-    time_zone: str | None = Field(None, description="IANA time zone, if known")
+    time_zone: TimeZoneName | None = Field(None, description="IANA time zone, if known")
 
     model_config = {"json_schema_extra": {"example": {"email": "organizer@example.com", "role": "organizer"}}}
 
@@ -20,8 +20,8 @@ class BookingParticipant(BaseModel):
 class BookingCreatedPayload(BaseModel):
     """Payload for booking.created event."""
 
-    volunteer_id: str | None = Field(None, description="Organizer (volunteer) UUID")
-    client_id: str | None = Field(None, description="Client UUID")
+    volunteer_id: UuidStr | None = Field(None, description="Organizer (volunteer) UUID")
+    client_id: UuidStr | None = Field(None, description="Client UUID")
     user: UserInfo = Field(..., description="Organizer information")
     client: ClientInfo = Field(..., description="Client information")
     start_time: datetime = Field(..., description="Booking start time (ISO 8601)")
@@ -120,7 +120,7 @@ class BookingCancelledPayload(BaseModel):
 class BookingReminderSentPayload(BaseModel):
     """Payload for booking.reminder_sent event (no producer today; kept for saver routing)."""
 
-    client_id: str | None = Field(None, description="Client UUID")
+    client_id: UuidStr | None = Field(None, description="Client UUID")
     email: EmailStr = Field(..., description="Email address where reminder was sent")
 
     model_config = {
