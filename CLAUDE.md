@@ -5,17 +5,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Commands
 
 ```bash
-# Install with dev dependencies
-pip install -e ".[dev]"
-
-# Lint
-ruff check .
-
-# Type check
-mypy event_schemas
+uv sync                # install with dev dependencies
+uv run pytest          # run tests (envelope / queue specs / payload mapping)
+uv run ruff check .    # lint
+uv run mypy event_schemas  # type check
 ```
-
-No test suite exists — this is a schema library relying on strict typing for correctness.
 
 ## Architecture
 
@@ -24,12 +18,15 @@ This is a **shared Python package** providing type-safe event schemas consumed b
 ### Module layout
 
 - `types.py` — Core enums (`EventType`, `EventPriority`, `RecipientRole`, `TriggerEvent`) and base models (`UserInfo`, `ClientInfo`). Also contains `EVENT_PRIORITIES` (EventType → priority int) and `EVENT_SCHEMA_VERSIONS` (EventType → version string).
+- `queues.py` — **Single source of truth for the RabbitMQ topology**: `EVENTS_EXCHANGE`, `EVENTS_DLX`, `QueueSpec` (queue name + binding + canonical arguments), `ALL_QUEUES`, `SAVER_QUEUES`, `ROUTING_RULES`. One queue per consumer; fan-out via multiple queues on the same routing key.
+- `envelope.py` — Canonical `{"original", "normalized"}` data envelope: `EventEnvelope`, `EnvelopeParticipant`, `unwrap_payload()`. Every RabbitMQ consumer MUST unwrap through this module.
+- `attributes.py` — Canonical CloudEvent extension attribute names (`bookingid` / `ce-bookingid`, `traceid`, `spanid`, `idempotencykey`).
+- `mapping.py` — `PAYLOAD_MODELS`: EventType → payload model for every event type.
 - `booking.py` — Payloads for booking lifecycle events (created, rescheduled, reassigned, cancelled, reminder sent).
 - `chat.py` — Payloads for GetStream chat events (created, deleted, message sent).
 - `meeting.py` — Payloads for Jitsi meeting URL events (created, deleted).
 - `notification.py` — Payloads for email/Telegram notification events, including complex rejection payloads.
 - `external.py` — Flexible payloads for third-party webhooks (UniSender, GetStream, Jitsi) that allow extra fields.
-- `normalized.py` — `TypedDict`-based structures (`NormalizedPayload`, `NormalizedData`, `NormalizedParticipant`, `NormalizedBooking`) for downstream normalization; uses structural typing rather than runtime validation.
 - `__init__.py` — Re-exports the full public API.
 
 ### Event priorities (used for RabbitMQ queue priority)
