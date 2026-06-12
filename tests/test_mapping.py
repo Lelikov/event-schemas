@@ -8,7 +8,8 @@ from event_schemas.attributes import BOOKING_ID_ATTRIBUTE, BOOKING_ID_HEADER
 from event_schemas.booking import BookingRejectedPayload, BookingRescheduledPayload
 from event_schemas.mapping import PAYLOAD_MODELS
 from event_schemas.meeting import MeetingUrlCreatedPayload
-from event_schemas.types import EventType
+from event_schemas.notification import NotificationCommandPayload
+from event_schemas.types import EventType, TriggerEvent
 
 
 def test_every_event_type_has_a_payload_model() -> None:
@@ -43,6 +44,28 @@ def test_booking_rejected_requires_client_email() -> None:
 
     assert payload.client_email == "cli@example.com"
     assert payload.has_active_booking is False
+
+
+def test_booking_rejected_accepts_blacklisted_type() -> None:
+    payload = BookingRejectedPayload(
+        client_email="cli@example.com",
+        rejection_type="blacklisted",
+        rejection_reasons=["Client is blacklisted"],
+    )
+
+    assert payload.rejection_type == "blacklisted"
+
+
+def test_trigger_event_has_blacklisted_rejection() -> None:
+    assert TriggerEvent.BOOKING_REJECTED_BLACKLISTED == "BOOKING_REJECTED_BLACKLISTED"
+
+    payload = NotificationCommandPayload(
+        booking_id="booking-uuid-123",
+        trigger_event=TriggerEvent.BOOKING_REJECTED_BLACKLISTED,
+        recipients=[{"email": "cli@example.com", "role": "client", "locale": "ru"}],
+    )
+
+    assert payload.trigger_event is TriggerEvent.BOOKING_REJECTED_BLACKLISTED
 
 
 def test_meeting_url_created_matches_consumer_contract() -> None:
