@@ -45,7 +45,7 @@ class SourceType(StrEnum):
     JITSI = "jitsi"
 
 
-class EventType(str, Enum):
+class EventType(StrEnum):
     """Unified event types across all services."""
 
     # Booking lifecycle
@@ -110,14 +110,14 @@ class EventPriority(int, Enum):
     LOW = 1  # analytics, audit events
 
 
-class RecipientRole(str, Enum):
+class RecipientRole(StrEnum):
     """Recipient role in booking context."""
 
     ORGANIZER = "organizer"
     CLIENT = "client"
 
 
-class TriggerEvent(str, Enum):
+class TriggerEvent(StrEnum):
     """Event that triggered a notification."""
 
     BOOKING_CREATED = "BOOKING_CREATED"
