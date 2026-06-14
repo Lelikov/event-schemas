@@ -1,0 +1,18 @@
+# GitLab CI — lint + test the event-schemas library (no Docker image: it is a
+# shared pip package, not a deployable service). Functionally identical to
+# .github/workflows/lint-test.yml.
+
+stages:
+  - test
+
+lint-and-test:
+  stage: test
+  image: ghcr.io/astral-sh/uv:python3.14-bookworm-slim
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+  script:
+    - uv sync --all-extras
+    - uv run ruff check .
+    - uv run ruff format --check .
+    - uv run pytest
