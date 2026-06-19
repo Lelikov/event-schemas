@@ -30,7 +30,12 @@ from event_schemas.notification import (
     TelegramNotificationPayload,
 )
 from event_schemas.types import EventType
-from event_schemas.user import BookingClientReassignedPayload, UserEmailChangeRequestedPayload
+from event_schemas.user import (
+    BookingClientReassignedPayload,
+    UserEmailChangeRequestedPayload,
+    UserSyncedPayload,
+    UserUpsertedPayload,
+)
 
 PAYLOAD_MODELS: dict[EventType, type[BaseModel]] = {
     # Booking lifecycle
@@ -55,6 +60,8 @@ PAYLOAD_MODELS: dict[EventType, type[BaseModel]] = {
     EventType.NOTIFICATION_PUSH_SENT: PushNotificationPayload,
     # User management
     EventType.USER_EMAIL_CHANGE_REQUESTED: UserEmailChangeRequestedPayload,
+    EventType.USER_UPSERTED: UserUpsertedPayload,
+    EventType.USER_SYNCED: UserSyncedPayload,
     # External pass-through
     EventType.UNISENDER_STATUS_CREATED: UniSenderStatusPayload,
 }

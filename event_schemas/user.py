@@ -41,3 +41,52 @@ class UserEmailChangeRequestedPayload(BaseModel):
             }
         }
     }
+
+
+class UserContactPayload(BaseModel):
+    """A single contact channel for a synced user."""
+
+    channel: str = Field(..., description="Contact channel, e.g. 'email' or 'telegram'")
+    contact_id: str = Field(..., description="Channel-specific identifier")
+
+
+class UserUpsertedPayload(BaseModel):
+    """Payload for user.upserted — a cal.com row mapped to a user (source of truth: cal.com)."""
+
+    email: EmailStr = Field(..., description="User email (unique within a role)")
+    role: str = Field(..., description="'client' (cal.com Attendee) or 'organizer' (cal.com users)")
+    time_zone: str | None = Field(None, description="IANA time zone from cal.com, or null")
+    name: str | None = Field(None, description="Display name from cal.com, or null")
+    contacts: list[UserContactPayload] = Field(default_factory=list, description="Extra contact channels")
+
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "email": "client@example.com",
+                "role": "client",
+                "time_zone": "Europe/Moscow",
+                "name": "Jane Client",
+                "contacts": [{"channel": "email", "contact_id": "client@example.com"}],
+            }
+        }
+    }
+
+
+class UserSyncedPayload(BaseModel):
+    """Payload for user.synced — event-users announces the resolved user_id for a synced user."""
+
+    email: EmailStr = Field(..., description="User email")
+    role: str = Field(..., description="'client' or 'organizer'")
+    user_id: UuidStr = Field(..., description="UUID assigned by event-users")
+    time_zone: str | None = Field(None, description="IANA time zone, or null")
+
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "email": "client@example.com",
+                "role": "client",
+                "user_id": "550e8400-e29b-41d4-a716-446655440001",
+                "time_zone": "Europe/Moscow",
+            }
+        }
+    }
