@@ -1,7 +1,12 @@
 import pytest
 from pydantic import ValidationError
 
-from event_schemas.user import UserContactPayload, UserSyncedPayload, UserUpsertedPayload
+from event_schemas.user import (
+    UserContactPayload,
+    UserEmailChangeRequestedPayload,
+    UserSyncedPayload,
+    UserUpsertedPayload,
+)
 
 
 def test_user_upserted_minimal() -> None:
@@ -26,3 +31,24 @@ def test_user_synced_requires_uuid() -> None:
     assert ok.role == "client"
     with pytest.raises(ValidationError):
         UserSyncedPayload(email="a@b.c", role="client", user_id="not-a-uuid", time_zone=None)
+
+
+def test_user_email_change_accepts_booking_uid() -> None:
+    p = UserEmailChangeRequestedPayload(
+        user_id="550e8400-e29b-41d4-a716-446655440001",
+        old_email="old@example.com",
+        new_email="new@example.com",
+        requested_by="admin@company.com",
+        booking_uid="book-123",
+    )
+    assert p.booking_uid == "book-123"
+
+
+def test_user_email_change_booking_uid_optional() -> None:
+    p = UserEmailChangeRequestedPayload(
+        user_id="550e8400-e29b-41d4-a716-446655440001",
+        old_email="old@example.com",
+        new_email="new@example.com",
+        requested_by="admin@company.com",
+    )
+    assert p.booking_uid is None

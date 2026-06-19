@@ -30,6 +30,7 @@ class UserEmailChangeRequestedPayload(BaseModel):
     old_email: EmailStr = Field(..., description="Current email before change")
     new_email: EmailStr = Field(..., description="New email to set")
     requested_by: str = Field(..., description="Admin email who requested the change")
+    booking_uid: str | None = Field(None, description="Booking UID whose Attendee email is also updated; null if N/A")
 
     model_config = {
         "json_schema_extra": {
@@ -38,6 +39,7 @@ class UserEmailChangeRequestedPayload(BaseModel):
                 "old_email": "old@example.com",
                 "new_email": "new@example.com",
                 "requested_by": "admin@company.com",
+                "booking_uid": "book-123",
             }
         }
     }

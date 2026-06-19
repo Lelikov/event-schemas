@@ -7,6 +7,8 @@ from event_schemas.queues import (
     EVENTS_DLX,
     ROUTING_RULES,
     SAVER_QUEUES,
+    USER_EMAIL_BOOKING_QUEUE,
+    USER_EMAIL_QUEUE,
     USER_SYNCED_QUEUE,
     RoutingKey,
 )
@@ -76,3 +78,12 @@ def test_sync_routing_rules_exist() -> None:
     rules = {(r.source_pattern, r.type_pattern): r.destination for r in ROUTING_RULES}
     assert rules[("db-sync", "user.upserted")] == RoutingKey.USER_EMAIL
     assert rules[("event-users", "user.synced")] == RoutingKey.USER_SYNCED
+
+
+def test_user_email_booking_queue_is_fanout() -> None:
+    assert USER_EMAIL_BOOKING_QUEUE.name == "events.user.email.booking"
+    assert USER_EMAIL_BOOKING_QUEUE.binding == RoutingKey.USER_EMAIL
+    assert USER_EMAIL_BOOKING_QUEUE.binding == USER_EMAIL_QUEUE.binding
+    assert USER_EMAIL_BOOKING_QUEUE.consumer == "event-booking"
+    assert USER_EMAIL_BOOKING_QUEUE in ALL_QUEUES
+    assert USER_EMAIL_BOOKING_QUEUE not in SAVER_QUEUES

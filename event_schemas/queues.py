@@ -128,6 +128,11 @@ USER_EMAIL_QUEUE = QueueSpec(
     binding=RoutingKey.USER_EMAIL,
     consumer="event-users",
 )
+USER_EMAIL_BOOKING_QUEUE = QueueSpec(
+    name="events.user.email.booking",
+    binding=RoutingKey.USER_EMAIL,
+    consumer="event-booking",
+)
 USER_SYNCED_QUEUE = QueueSpec(
     name="events.user.synced",
     binding=RoutingKey.USER_SYNCED,
@@ -151,6 +156,7 @@ ALL_QUEUES: tuple[QueueSpec, ...] = (
     JITSI_QUEUE,
     MAIL_QUEUE,
     USER_EMAIL_QUEUE,
+    USER_EMAIL_BOOKING_QUEUE,
     USER_SYNCED_QUEUE,
     UNROUTED_QUEUE,
 )
