@@ -51,6 +51,7 @@ from event_schemas.queues import (
     MAX_PRIORITY,
     ROUTING_RULES,
     SAVER_QUEUES,
+    USER_SYNCED_QUEUE,
     QueueSpec,
     RoutingKey,
     RoutingRuleSpec,
@@ -68,9 +69,15 @@ from event_schemas.types import (
     UserInfo,
     UuidStr,
 )
-from event_schemas.user import BookingClientReassignedPayload, UserEmailChangeRequestedPayload
+from event_schemas.user import (
+    BookingClientReassignedPayload,
+    UserContactPayload,
+    UserEmailChangeRequestedPayload,
+    UserSyncedPayload,
+    UserUpsertedPayload,
+)
 
-__version__ = "0.2.0"
+__version__ = "0.4.0"
 
 __all__ = [
     "ALL_QUEUES",
@@ -94,6 +101,7 @@ __all__ = [
     "SPAN_ID_HEADER",
     "TRACE_ID_ATTRIBUTE",
     "TRACE_ID_HEADER",
+    "USER_SYNCED_QUEUE",
     # Booking
     "BookingCancelledPayload",
     "BookingClientReassignedPayload",
@@ -136,8 +144,11 @@ __all__ = [
     "TriggerEvent",
     # External
     "UniSenderStatusPayload",
+    "UserContactPayload",
     "UserEmailChangeRequestedPayload",
     "UserInfo",
+    "UserSyncedPayload",
+    "UserUpsertedPayload",
     "UuidStr",
     "unwrap_payload",
 ]
