@@ -74,6 +74,8 @@ class EventType(StrEnum):
 
     # User management
     USER_EMAIL_CHANGE_REQUESTED = "user.email.change_requested"
+    USER_UPSERTED = "user.upserted"
+    USER_SYNCED = "user.synced"
 
     # External integrations
     UNISENDER_STATUS_CREATED = "unisender.events.v1.transactional.status.create"
@@ -157,6 +159,8 @@ EVENT_PRIORITIES: dict[EventType, EventPriority] = {
     EventType.BOOKING_REJECTED: EventPriority.CRITICAL,
     # Critical: user management
     EventType.USER_EMAIL_CHANGE_REQUESTED: EventPriority.CRITICAL,
+    EventType.USER_UPSERTED: EventPriority.CRITICAL,
+    EventType.USER_SYNCED: EventPriority.CRITICAL,
     # Normal: chat and meeting
     EventType.CHAT_CREATED: EventPriority.NORMAL,
     EventType.CHAT_DELETED: EventPriority.NORMAL,
@@ -209,6 +213,8 @@ EVENT_SCHEMA_VERSIONS: dict[EventType, str] = {
     EventType.NOTIFICATION_SEND_REQUESTED: "v1",
     EventType.NOTIFICATION_PUSH_SENT: "v1",
     EventType.USER_EMAIL_CHANGE_REQUESTED: "v1",
+    EventType.USER_UPSERTED: "v1",
+    EventType.USER_SYNCED: "v1",
     EventType.UNISENDER_STATUS_CREATED: "v1",
     EventType.GETSTREAM_CHANNEL_CREATED: "v1",
     EventType.GETSTREAM_CHANNEL_DELETED: "v1",
