@@ -7,6 +7,7 @@ from event_schemas.queues import (
     EVENTS_DLX,
     ROUTING_RULES,
     SAVER_QUEUES,
+    USER_SYNCED_QUEUE,
     RoutingKey,
 )
 
@@ -62,3 +63,16 @@ def test_saver_queues_subset() -> None:
     assert set(SAVER_QUEUES) == {q for q in ALL_QUEUES if q.consumer == "event-saver"}
     assert BOOKING_LIFECYCLE_SAVER_QUEUE in SAVER_QUEUES
     assert BOOKING_LIFECYCLE_BOOKING_QUEUE not in SAVER_QUEUES
+
+
+def test_user_synced_queue_is_saver_owned() -> None:
+    assert USER_SYNCED_QUEUE.name == "events.user.synced"
+    assert USER_SYNCED_QUEUE.binding == RoutingKey.USER_SYNCED
+    assert USER_SYNCED_QUEUE in ALL_QUEUES
+    assert USER_SYNCED_QUEUE in SAVER_QUEUES  # consumer == "event-saver"
+
+
+def test_sync_routing_rules_exist() -> None:
+    rules = {(r.source_pattern, r.type_pattern): r.destination for r in ROUTING_RULES}
+    assert rules[("db-sync", "user.upserted")] == RoutingKey.USER_EMAIL
+    assert rules[("event-users", "user.synced")] == RoutingKey.USER_SYNCED

@@ -38,6 +38,7 @@ class RoutingKey(StrEnum):
     JITSI = "events.jitsi"
     MAIL = "events.mail"
     USER_EMAIL = "events.user.email"
+    USER_SYNCED = "events.user.synced"
     UNROUTED = "events.unrouted"
 
 
@@ -127,6 +128,11 @@ USER_EMAIL_QUEUE = QueueSpec(
     binding=RoutingKey.USER_EMAIL,
     consumer="event-users",
 )
+USER_SYNCED_QUEUE = QueueSpec(
+    name="events.user.synced",
+    binding=RoutingKey.USER_SYNCED,
+    consumer="event-saver",
+)
 UNROUTED_QUEUE = QueueSpec(
     name="events.unrouted",
     binding=RoutingKey.UNROUTED,
@@ -145,6 +151,7 @@ ALL_QUEUES: tuple[QueueSpec, ...] = (
     JITSI_QUEUE,
     MAIL_QUEUE,
     USER_EMAIL_QUEUE,
+    USER_SYNCED_QUEUE,
     UNROUTED_QUEUE,
 )
 
@@ -187,4 +194,6 @@ ROUTING_RULES: tuple[RoutingRuleSpec, ...] = (
     RoutingRuleSpec(RoutingKey.CHAT_EXTERNAL, "getstream", "getstream.*"),
     # Admin-originated user management
     RoutingRuleSpec(RoutingKey.USER_EMAIL, "admin", "user.email.*"),
+    RoutingRuleSpec(RoutingKey.USER_EMAIL, "db-sync", "user.upserted"),
+    RoutingRuleSpec(RoutingKey.USER_SYNCED, "event-users", "user.synced"),
 )
